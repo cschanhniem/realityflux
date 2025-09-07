@@ -116,87 +116,91 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey }) => {
         </div>
       </div>
 
-      {/* Camera Controls */}
-      <div className="absolute top-20 right-4 z-20">
-        {!isStreaming ? (
-          <button
-            onClick={handleStartCamera}
-            className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-colors"
-            title="Start Camera"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </button>
-        ) : (
-          <button
-            onClick={stopCamera}
-            className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-colors"
-            title="Stop Camera"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Bottom Controls Panel */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 pb-safe">
-        {/* Transform Input */}
-        <div className="mb-4">
-          <form onSubmit={handleSubmitCommand} className="flex gap-2">
-            <input
-              type="text"
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              placeholder="Transform reality..."
-              className="flex-1 px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              disabled={!isStreaming || isProcessing}
-            />
+      {/* Bottom Controls Panel - Fixed at bottom with higher z-index */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-t border-white/20 p-4">
+        {/* Camera Controls */}
+        <div className="flex justify-center mb-4">
+          {!isStreaming ? (
             <button
-              type="submit"
-              disabled={!isStreaming || isProcessing || !currentInput.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-full transition-colors flex items-center justify-center"
+              onClick={handleStartCamera}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full shadow-lg transition-colors font-semibold text-lg flex items-center gap-3 border-2 border-white/30"
             >
-              {isProcessing ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              )}
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Start Camera
             </button>
-          </form>
+          ) : (
+            <button
+              onClick={stopCamera}
+              className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full shadow-lg transition-colors font-semibold text-lg flex items-center gap-3 border-2 border-white/30"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Stop Camera
+            </button>
+          )}
         </div>
 
-        {/* Sample Prompts - Horizontal Scroll */}
-        <div className="mb-4">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {[
-              "Cyberpunk city",
-              "Underwater world",
-              "Winter wonderland", 
-              "Outer space",
-              "Medieval castle",
-              "Storm clouds",
-              "Tropical beach",
-              "Sci-fi future"
-            ].map((prompt, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentInput(`Make it look like a ${prompt.toLowerCase()}`)}
-                className="whitespace-nowrap px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-sm text-white rounded-full hover:bg-white/20 transition-colors"
+        {/* Transform Input - Only show when camera is streaming */}
+        {isStreaming && (
+          <div className="mb-3">
+            <form onSubmit={handleSubmitCommand} className="flex gap-2">
+              <input
+                type="text"
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                placeholder="Transform reality..."
+                className="flex-1 px-4 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white placeholder-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 disabled={isProcessing}
+              />
+              <button
+                type="submit"
+                disabled={isProcessing || !currentInput.trim()}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-full transition-colors flex items-center justify-center"
               >
-                {prompt}
+                {isProcessing ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                )}
               </button>
-            ))}
+            </form>
           </div>
-        </div>
+        )}
+
+        {/* Sample Prompts - Only show when camera is streaming */}
+        {isStreaming && (
+          <div className="mb-3">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {[
+                "Cyberpunk city",
+                "Underwater world",
+                "Winter wonderland", 
+                "Outer space",
+                "Medieval castle",
+                "Storm clouds",
+                "Tropical beach",
+                "Sci-fi future"
+              ].map((prompt, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentInput(`Make it look like a ${prompt.toLowerCase()}`)}
+                  className="whitespace-nowrap px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 text-sm text-white rounded-full hover:bg-white/30 transition-colors"
+                  disabled={isProcessing}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Status Display */}
-        {lastCommand && (
+        {lastCommand && isStreaming && (
           <div className="text-center mb-2">
             <p className="text-xs text-gray-300">
               <strong>Active:</strong> {lastCommand}
@@ -205,11 +209,11 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey }) => {
         )}
 
         {/* Clear Effects Button */}
-        {processedFrame && (
+        {processedFrame && isStreaming && (
           <div className="text-center">
             <button
               onClick={() => setProcessedFrame(null)}
-              className="bg-yellow-600/80 hover:bg-yellow-700/80 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm transition-colors"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-full text-sm font-semibold transition-colors border border-white/30"
             >
               Clear Effects
             </button>
