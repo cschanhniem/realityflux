@@ -164,10 +164,40 @@ export const useGeminiImage = (apiKey: string) => {
     });
   }, [apiKey, executeWithQueue]);
 
+  const transcribeAudio = useCallback(async (base64Audio: string, mimeType: string = 'audio/webm'): Promise<string> => {
+    if (!apiKey) throw new Error('API key is required');
+    
+    return executeWithQueue(async () => {
+      const ai = new GoogleGenAI({ apiKey });
+      
+      const contents = [
+        { text: 'Generate a transcript of the speech. Return only the spoken words without any additional formatting or explanations.' },
+        {
+          inlineData: {
+            mimeType,
+            data: base64Audio,
+          },
+        },
+      ];
+      
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents
+      });
+      
+      if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('No transcript received from API');
+      }
+      
+      return response.candidates[0].content.parts[0].text.trim();
+    });
+  }, [apiKey, executeWithQueue]);
+
   return {
     generateImage,
     editImage,
     fuseImages,
+    transcribeAudio,
     isLoading,
     error,
     clearError: () => setError(null)

@@ -13,10 +13,11 @@
 
 ### RealityFlux Live (AR Camera Mode)
 - **Real-time Camera Stream**: Live video capture at 640×480 resolution
-- **Voice Commands**: Browser-based speech recognition for natural interaction
+- **AI Voice Recognition**: Gemini-powered speech-to-text transcription
 - **Live Reality Transformation**: AI-powered real-time scene modification
 - **Frame Processing**: 512×288 optimized frames for Gemini AI processing
 - **Video Recording**: 30-second clip recording and download
+- **Modular Architecture**: Clean separation of concerns with custom hooks and components
 - **Ambient Sound Integration**: ElevenLabs placeholder for immersive audio
 
 ### Shared Features
@@ -93,10 +94,15 @@ src/
 │   ├── PromptForm.tsx   # Text input and action buttons
 │   ├── ImageCanvas.tsx  # Image display and download
 │   ├── ImageUpload.tsx  # Drag & drop file upload
-│   ├── RealityFlux.tsx  # Real-time AR camera component
+│   ├── RealityFlux.tsx  # Real-time AR main component
+│   ├── CameraView.tsx   # Camera stream and recording controls
+│   ├── VoiceControls.tsx # AI voice recognition interface
 │   └── Toast.tsx        # Notification system
-├── hooks/
-│   └── useGeminiImage.ts # Gemini AI integration
+├── hooks/               # Custom React hooks
+│   ├── useGeminiImage.ts # Gemini AI integration (images + audio)
+│   ├── useCameraStream.ts # Camera stream management
+│   ├── useVideoRecording.ts # Video recording logic
+│   └── useAudioRecording.ts # Audio recording and transcription
 ├── App.tsx              # Main app with dual-mode navigation
 ├── main.tsx             # Application entry point
 └── index.css            # Global styles and Tailwind
@@ -104,13 +110,14 @@ src/
 
 ## API Integration
 
-The `useGeminiImage` hook provides three main functions:
+The `useGeminiImage` hook provides four main functions:
 
 - `generateImage(prompt: string)`: Creates new images from text
 - `editImage(base64Image: string, prompt: string)`: Modifies existing images
 - `fuseImages(img1: string, img2: string, prompt: string)`: Combines two images
+- `transcribeAudio(base64Audio: string, mimeType: string)`: Converts audio to text using Gemini
 
-All functions include automatic throttling and error handling.
+All functions include automatic throttling and error handling with a 3-second delay queue system.
 
 ## Development
 
