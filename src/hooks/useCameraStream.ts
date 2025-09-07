@@ -7,21 +7,47 @@ export const useCameraStream = () => {
 
   const startCamera = useCallback(async (onError: (error: string) => void) => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 640 }, 
-          height: { ideal: 480 },
-          facingMode: 'environment' 
-        },
-        audio: true 
-      });
+      // First try with environment camera (back camera on mobile)
+      let stream: MediaStream;
+      
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 },
+            facingMode: 'environment' 
+          },
+          audio: false // Remove audio to avoid permission conflicts
+        });
+      } catch (envError) {
+        // Fallback to any available camera
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        setIsStreaming(true);
+        
+        // Wait for the video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              setIsStreaming(true);
+            }).catch((playError) => {
+              console.error('Error playing video:', playError);
+              onError('Failed to start camera playback');
+            });
+          }
+        };
       }
     } catch (err) {
-      onError('Camera access denied. Please allow camera permissions.');
+      console.error('Camera error:', err);
+      onError(`Camera access failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }, []);
 

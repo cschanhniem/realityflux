@@ -90,7 +90,16 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey }) => {
           autoPlay
           playsInline
           muted
+          controls={false}
           className="w-full h-full object-cover"
+          style={{ backgroundColor: '#000' }}
+          onError={(e) => {
+            console.error('Video element error:', e);
+            handleError('Video playback failed');
+          }}
+          onLoadedData={() => {
+            console.log('Video data loaded successfully');
+          }}
         />
         <canvas ref={canvasRef} className="hidden" width="512" height="288" />
         
