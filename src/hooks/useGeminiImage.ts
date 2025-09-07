@@ -71,7 +71,7 @@ export const useGeminiImage = (apiKey: string) => {
       
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image-preview',
-        contents: `Generate an image based on this prompt: ${prompt}`
+        contents: [`Generate an image based on this prompt: ${prompt}`]
       });
       
       if (!response.candidates?.[0]?.content?.parts) {
@@ -173,14 +173,11 @@ export const useGeminiImage = (apiKey: string) => {
         
         const ai = new GoogleGenAI({ apiKey });
         
-        // Use audio/wav as it's more widely supported
-        const supportedMimeType = mimeType.includes('webm') ? 'audio/wav' : mimeType;
-        
         const contents = [
           { text: 'Please transcribe this audio. Return only the spoken words without any formatting.' },
           {
             inlineData: {
-              mimeType: supportedMimeType,
+              mimeType,
               data: base64Audio,
             },
           },

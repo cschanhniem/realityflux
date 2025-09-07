@@ -34,6 +34,12 @@ export const useAudioRecording = () => {
       const audioRecorder = new MediaRecorder(audioStream, options);
       
       const audioChunks: Blob[] = [];
+      let recordedMimeType = 'audio/webm'; // default fallback
+      
+      // Store the actual mime type that will be used
+      if (options && 'mimeType' in options) {
+        recordedMimeType = options.mimeType as string;
+      }
       
       audioRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunks.push(e.data);
@@ -41,7 +47,7 @@ export const useAudioRecording = () => {
       
       audioRecorder.onstop = async () => {
         try {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(audioChunks, { type: recordedMimeType });
           
           // Convert to base64
           const reader = new FileReader();
@@ -49,8 +55,8 @@ export const useAudioRecording = () => {
             try {
               const base64Audio = (reader.result as string).split(',')[1];
               
-              // Transcribe using Gemini
-              const transcript = await transcribeAudio(base64Audio, 'audio/webm');
+              // Transcribe using Gemini with the correct MIME type
+              const transcript = await transcribeAudio(base64Audio, recordedMimeType);
               
               if (transcript.trim()) {
                 onTranscript(transcript);
