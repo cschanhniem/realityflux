@@ -2,9 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useGeminiImage } from '../hooks/useGeminiImage';
 import { useCameraStream } from '../hooks/useCameraStream';
 import { useVideoRecording } from '../hooks/useVideoRecording';
-import { useAudioRecording } from '../hooks/useAudioRecording';
 import CameraView from './CameraView';
-import VoiceControls from './VoiceControls';
 
 interface RealityFluxProps {
   apiKey: string;
@@ -14,10 +12,11 @@ interface RealityFluxProps {
 const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastCommand, setLastCommand] = useState('');
+  const [currentInput, setCurrentInput] = useState('');
   const [processedFrame, setProcessedFrame] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  const { editImage, transcribeAudio } = useGeminiImage(apiKey);
+  const { editImage } = useGeminiImage(apiKey);
   const { 
     videoRef, 
     canvasRef, 
@@ -28,7 +27,6 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
     getStream 
   } = useCameraStream();
   const { isRecording, startRecording, stopRecording } = useVideoRecording();
-  const { isRecordingAudio, startAudioRecording, stopAudioRecording } = useAudioRecording();
 
   const handleError = useCallback((errorMessage: string) => {
     setError(errorMessage);
@@ -38,11 +36,12 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
     setError(null);
   }, []);
 
-  const processVoiceCommand = useCallback(async (command: string) => {
+  const processTextCommand = useCallback(async (command: string) => {
     if (!command.trim() || !isStreaming) return;
     
     setIsProcessing(true);
     setLastCommand(command);
+    setCurrentInput(''); // Clear input after processing
     
     try {
       const frameBase64 = captureFrame();
@@ -62,9 +61,6 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
       
       setProcessedFrame(result);
       
-      // Simulate ElevenLabs audio (placeholder for now)
-      playAmbientSound(command);
-      
     } catch (err) {
       handleError(err instanceof Error ? err.message : 'Failed to process command');
     } finally {
@@ -72,11 +68,12 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
     }
   }, [captureFrame, processedFrame, editImage, isStreaming, handleError]);
 
-  const playAmbientSound = useCallback((command: string) => {
-    // Placeholder for ElevenLabs integration
-    // In real implementation, this would call ElevenLabs API to generate ambient sounds
-    console.log(`Playing ambient sound for: ${command}`);
-  }, []);
+  const handleSubmitCommand = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentInput.trim()) {
+      processTextCommand(currentInput.trim());
+    }
+  }, [currentInput, processTextCommand]);
 
   const handleStartCamera = useCallback(() => {
     startCamera(handleError);
@@ -90,25 +87,12 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
     }
   }, [getStream, startRecording, handleError]);
 
-  const handleStartVoiceRecording = useCallback(() => {
-    const stream = getStream();
-    if (stream) {
-      startAudioRecording(
-        stream,
-        transcribeAudio,
-        processVoiceCommand,
-        handleError
-      );
-    }
-  }, [getStream, startAudioRecording, transcribeAudio, processVoiceCommand, handleError]);
-
   useEffect(() => {
     return () => {
       stopCamera();
       if (isRecording) stopRecording();
-      if (isRecordingAudio) stopAudioRecording();
     };
-  }, [stopCamera, stopRecording, stopAudioRecording, isRecording, isRecordingAudio]);
+  }, [stopCamera, stopRecording, isRecording]);
 
   return (
     <div className="min-h-screen bg-black text-white p-4">
@@ -118,7 +102,7 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
               RealityFlux Live
             </h1>
-            <p className="text-gray-400">Verbally rewrite reality in real-time</p>
+            <p className="text-gray-400">Transform reality with text commands</p>
           </div>
           <button
             onClick={onBack}
@@ -147,19 +131,50 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
 
           {/* Controls */}
           <div className="space-y-6">
-            <VoiceControls
-              isStreaming={isStreaming}
-              isProcessing={isProcessing}
-              isRecordingAudio={isRecordingAudio}
-              lastCommand={lastCommand}
-              onStartVoiceRecording={handleStartVoiceRecording}
-            />
+            {/* Text Command Input */}
+            <div className="bg-gray-800 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">Transform Reality</h3>
+              <form onSubmit={handleSubmitCommand} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    value={currentInput}
+                    onChange={(e) => setCurrentInput(e.target.value)}
+                    placeholder="Type what you want to transform... (e.g., 'make it look like a cyberpunk city')"
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    disabled={!isStreaming || isProcessing}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!isStreaming || isProcessing || !currentInput.trim()}
+                  className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <span>Transform Reality</span>
+                  )}
+                </button>
+              </form>
+              
+              {lastCommand && (
+                <div className="mt-4 p-3 bg-gray-700 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    <strong>Last Command:</strong> {lastCommand}
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">How It Works</h3>
               <div className="text-sm text-gray-400 space-y-2">
                 <p>1. <strong>Camera Capture:</strong> Live video stream at 512×288</p>
-                <p>2. <strong>Voice Recognition:</strong> Gemini AI speech-to-text</p>
+                <p>2. <strong>Text Input:</strong> Type transformation commands</p>
                 <p>3. <strong>AI Processing:</strong> Gemini 2.5 Flash Image editing</p>
                 <p>4. <strong>Real-time Overlay:</strong> Processed frames over camera</p>
                 <p>5. <strong>Recording:</strong> 30-second clips for sharing</p>
