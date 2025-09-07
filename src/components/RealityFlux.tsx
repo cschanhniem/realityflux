@@ -108,7 +108,7 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey }) => {
           
           {/* AI Processed Frame Overlay */}
           {processedFrame && (
-            <div className="absolute inset-0 bg-black bg-opacity-40">
+            <div className="absolute inset-0 bg-black">
               <img
                 src={`data:image/jpeg;base64,${processedFrame}`}
                 alt="AI Transformed Reality"
