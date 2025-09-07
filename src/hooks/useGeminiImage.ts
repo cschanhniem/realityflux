@@ -168,28 +168,61 @@ export const useGeminiImage = (apiKey: string) => {
     if (!apiKey) throw new Error('API key is required');
     
     return executeWithQueue(async () => {
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const contents = [
-        { text: 'Generate a transcript of the speech. Return only the spoken words without any additional formatting or explanations.' },
-        {
-          inlineData: {
-            mimeType,
-            data: base64Audio,
+      try {
+        console.log('Starting audio transcription...', { mimeType, audioLength: base64Audio.length });
+        
+        const ai = new GoogleGenAI({ apiKey });
+        
+        // Use audio/wav as it's more widely supported
+        const supportedMimeType = mimeType.includes('webm') ? 'audio/wav' : mimeType;
+        
+        const contents = [
+          { text: 'Please transcribe this audio. Return only the spoken words without any formatting.' },
+          {
+            inlineData: {
+              mimeType: supportedMimeType,
+              data: base64Audio,
+            },
           },
-        },
-      ];
-      
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents
-      });
-      
-      if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
-        throw new Error('No transcript received from API');
+        ];
+        
+        console.log('Making API call to Gemini for transcription...');
+        
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents
+        });
+        
+        console.log('Gemini transcription response:', response);
+        
+        if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
+          console.error('No transcript in response:', response);
+          throw new Error('No transcript received from API. The audio may be too quiet or unclear.');
+        }
+        
+        const transcript = response.candidates[0].content.parts[0].text.trim();
+        console.log('Transcription successful:', transcript);
+        
+        return transcript;
+        
+      } catch (error) {
+        console.error('Audio transcription error:', error);
+        
+        // Provide more specific error messages
+        if (error instanceof Error) {
+          if (error.message.includes('500')) {
+            throw new Error('Server error during transcription. The audio format may not be supported or the audio is too quiet.');
+          } else if (error.message.includes('quota')) {
+            throw new Error('API quota exceeded. Please try again later.');
+          } else if (error.message.includes('unauthorized')) {
+            throw new Error('Invalid API key. Please check your Gemini API key.');
+          } else {
+            throw new Error(`Transcription failed: ${error.message}`);
+          }
+        }
+        
+        throw new Error('Audio transcription failed. Please try speaking louder and clearer.');
       }
-      
-      return response.candidates[0].content.parts[0].text.trim();
     });
   }, [apiKey, executeWithQueue]);
 

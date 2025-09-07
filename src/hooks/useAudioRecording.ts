@@ -18,9 +18,20 @@ export const useAudioRecording = () => {
       }
       
       const audioStream = new MediaStream(audioTracks);
-      const audioRecorder = new MediaRecorder(audioStream, { 
-        mimeType: 'audio/webm' 
-      });
+      
+      // Try different audio formats for better compatibility
+      let options = {};
+      if (MediaRecorder.isTypeSupported('audio/wav')) {
+        options = { mimeType: 'audio/wav' };
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options = { mimeType: 'audio/webm;codecs=opus' };
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        options = { mimeType: 'audio/webm' };
+      } else {
+        console.warn('No supported audio format found, using default');
+      }
+      
+      const audioRecorder = new MediaRecorder(audioStream, options);
       
       const audioChunks: Blob[] = [];
       
