@@ -2,6 +2,8 @@
 
 **PanelFlash** is a dual-mode React/TypeScript web application combining AI-powered image generation with real-time AR reality transformation using Google's Gemini AI.
 
+Demo: https://banana-hackathon.pages.dev 
+
 ## Dual Mode Features
 
 ### PanelFlash (Static Image Mode)
