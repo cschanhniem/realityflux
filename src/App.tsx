@@ -101,7 +101,7 @@ function App() {
   }, [error, clearError]);
 
   if (currentView === 'realityflux') {
-    return <RealityFlux apiKey={apiKey} onBack={() => setCurrentView('panelflash')} />;
+    return <RealityFlux apiKey={apiKey} />;
   }
 
   return (
