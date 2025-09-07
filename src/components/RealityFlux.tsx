@@ -18,7 +18,7 @@ const RealityFlux: React.FC<RealityFluxProps> = ({ apiKey, onBack }) => {
   const [processedFrame, setProcessedFrame] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  const { generateImage, editImage } = useGeminiImage(apiKey);
+  const { editImage } = useGeminiImage(apiKey);
   
   const startCamera = useCallback(async () => {
     try {

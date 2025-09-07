@@ -100,14 +100,31 @@ function App() {
     }
   }, [error, clearError]);
 
+  if (currentView === 'realityflux') {
+    return <RealityFlux apiKey={apiKey} onBack={() => setCurrentView('panelflash')} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="max-w-6xl mx-auto">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-            PanelFlash
-          </h1>
-          <p className="text-gray-400 mt-2">AI-Powered Image Generation, Editing & Fusion</p>
+          <div className="flex justify-between items-center mb-4">
+            <div></div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+              PanelFlash
+            </h1>
+            <button
+              onClick={() => setCurrentView('realityflux')}
+              disabled={!apiKey}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all transform hover:scale-105"
+            >
+              🚀 RealityFlux Live
+            </button>
+          </div>
+          <p className="text-gray-400">AI-Powered Image Generation, Editing & Fusion</p>
+          {!apiKey && (
+            <p className="text-yellow-400 text-sm mt-2">⚠️ Set API key to unlock RealityFlux Live</p>
+          )}
         </header>
 
         <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} />
@@ -138,6 +155,23 @@ function App() {
                 />
               </div>
             </div>
+
+            {apiKey && (
+              <div className="bg-gradient-to-r from-purple-800 to-pink-800 rounded-lg p-6 border border-purple-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-2">🎯 Ready for RealityFlux?</h3>
+                    <p className="text-purple-100 text-sm">Transform reality with voice commands in real-time AR</p>
+                  </div>
+                  <button
+                    onClick={() => setCurrentView('realityflux')}
+                    className="px-6 py-3 bg-white text-purple-800 font-bold rounded-lg hover:bg-gray-100 transition-colors transform hover:scale-105"
+                  >
+                    Launch AR →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

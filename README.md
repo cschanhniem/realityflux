@@ -1,16 +1,28 @@
-# PanelFlash
+# PanelFlash + RealityFlux Live
 
-**PanelFlash** is a modern React/TypeScript web application for AI-powered image generation, editing, and fusion using Google's Gemini AI.
+**PanelFlash** is a dual-mode React/TypeScript web application combining AI-powered image generation with real-time AR reality transformation using Google's Gemini AI.
 
-## Features
+## Dual Mode Features
 
+### PanelFlash (Static Image Mode)
 - **Text-to-Image Generation**: Create stunning images from text prompts
 - **Image Editing**: Modify existing images with natural language instructions
 - **Image Fusion**: Combine two uploaded images with custom prompts
 - **Real-time Processing**: Instant image display with base64 encoding
 - **Drag & Drop Upload**: Intuitive file upload interface
+
+### RealityFlux Live (AR Camera Mode)
+- **Real-time Camera Stream**: Live video capture at 640×480 resolution
+- **Voice Commands**: Browser-based speech recognition for natural interaction
+- **Live Reality Transformation**: AI-powered real-time scene modification
+- **Frame Processing**: 512×288 optimized frames for Gemini AI processing
+- **Video Recording**: 30-second clip recording and download
+- **Ambient Sound Integration**: ElevenLabs placeholder for immersive audio
+
+### Shared Features
 - **Rate Limiting**: Built-in throttling (≤20 images/min, 3s delays)
 - **Error Handling**: Comprehensive error management with toast notifications
+- **Runtime API Key**: No hardcoded secrets - paste key at runtime
 
 ## Tech Stack
 
@@ -81,10 +93,11 @@ src/
 │   ├── PromptForm.tsx   # Text input and action buttons
 │   ├── ImageCanvas.tsx  # Image display and download
 │   ├── ImageUpload.tsx  # Drag & drop file upload
+│   ├── RealityFlux.tsx  # Real-time AR camera component
 │   └── Toast.tsx        # Notification system
 ├── hooks/
 │   └── useGeminiImage.ts # Gemini AI integration
-├── App.tsx              # Main application component
+├── App.tsx              # Main app with dual-mode navigation
 ├── main.tsx             # Application entry point
 └── index.css            # Global styles and Tailwind
 ```
